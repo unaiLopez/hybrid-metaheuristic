@@ -9,3 +9,5 @@ matplotlib==3.10.3
 networkx==3.5
 
 # conda install -c conda-forge pygraphviz
+
+TIEMPO 0.0004696846008300781

@@ -2,12 +2,13 @@ from equations import *
 from multi_swarm_optimizer import MultiSwarmOptimizer
 
 # Parámetros del problema
-bounds, dimension, stop_optimum_value = get_bounds_dimensions_and_stop_global_optimum(schwefel_2_22, "hard")
+my_function = rastrigin
+bounds, dimension, stop_optimum_value = get_bounds_dimensions_and_stop_global_optimum(my_function, "hard")
 bounds = [bounds] * dimension
 
 # Instanciar el optimizador multi-enjambre
 optimizer = MultiSwarmOptimizer(
-    objective=schwefel_2_22,
+    objective=my_function,
     dim=dimension,
     bounds=bounds,
     num_swarms=5,

@@ -31,6 +31,13 @@ class Swarm:
         self.best_global = self.positions[self.best_index].copy()
         self.best_score = self.values[self.best_index]
         self.memory.update(self.best_global, self.best_score)
+    
+    def update_best(self, new_best_global: np.ndarray, new_best_value: float) -> None:
+        self.values[self.best_index] = new_best_value
+        self.positions[self.best_index] = new_best_global
+        self.best_global = new_best_global
+        self.best_score = new_best_value
+        self.memory.update(self.best_global, self.best_score)
 
     def step(self) -> None:
         # Actualizar el mejor global

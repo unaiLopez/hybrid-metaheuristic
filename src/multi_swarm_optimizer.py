@@ -1,6 +1,7 @@
 from swarm import Swarm
 from typing import Tuple, Optional, Callable, List
 import numpy as np
+import local_search
 
 
 class MultiSwarmOptimizer:
@@ -53,7 +54,7 @@ class MultiSwarmOptimizer:
                 if i != src_idx:
                     swarm.memory.update(pos, val)
 
-    def optimize(self, no_improvement_threshold: float = 1e-9) -> Tuple[np.ndarray, float]:
+    def optimize(self, no_improvement_threshold: float = 1e-5) -> Tuple[np.ndarray, float]:
         best_global: Optional[np.ndarray] = None
         best_score: float = float('inf')
 
@@ -81,6 +82,25 @@ class MultiSwarmOptimizer:
             if best_score <= self.stop_score:
                 print("Optimal Solution found... Stopping optimization process...")
                 return best_global, best_score
+            
+            if gen % 200 == 0 and gen != 0:
+                # I have to work on this part local explotation with Adam Optimizer
+                # 🔽 Adam refinement step
+                for swarm in self.swarms:
+                    print("Starting local optimization with Adam...")
+                    best_global, best_score = local_search.adam_optimize(
+                        f=self.objective,
+                        x_init=swarm.best_global,
+                        learning_rate=1e-1,
+                        max_iters=500,
+                        tol=1e-6
+                    )
+                    if best_score < swarm.best_score:
+                        swarm.update_best(best_global, best_score)
+                        print(f"Adam optimization completed. Final score: {best_score:.10f}")
+                    if best_score <= self.stop_score:
+                        print("Optimal Solution found... Stopping optimization process...")
+                        return best_global, best_score
 
             if num_no_improve_generations >= self.num_generations_no_improve_stop:
                 print(f"Improvement below {no_improvement_threshold} for {self.num_generations_no_improve_stop} generations. "
@@ -88,21 +108,6 @@ class MultiSwarmOptimizer:
                 return best_global, best_score
 
 
-            # I have to work on this part local explotation with Adam Optimizer
-            # 🔽 Adam refinement step
-            import local_search
-            if gen % 100 == 0:
-                for swarm in self.swarms:
-                    print("Starting local optimization with Adam...")
-                    best_global, best_score = local_search.adam_optimize(
-                        f=self.objective,
-                        x_init=swarm.best_global[:],
-                        learning_rate=1e-1,
-                        max_iters=500,
-                        tol=1e-6
-                    )
-                    swarm.best_score = best_score
-                    swarm.best_global[:] = best_global
-                    print(best_score)
-                    print(f"Adam optimization completed. Final score: {best_score:.10f}")
+           
+                    
         return best_global, best_score

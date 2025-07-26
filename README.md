@@ -1,0 +1,3 @@
+- In order to try to escape the local minimum, after Adam and PSO fail. Try restarting the particles using Gaussian noise for every particle except from the best one of each swarm (Call it Local Splash)
+- Adam has fixed hyperparameters. Propose a random pick between various ranges (more diversity)
+- Lastly maybe I can explore further the search space shrinkage

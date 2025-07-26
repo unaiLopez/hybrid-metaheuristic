@@ -1,13 +1,17 @@
 import numpy as np
 from typing import Callable, Tuple
+import time
 
 def numerical_gradient(f: Callable[[np.ndarray], float], x: np.ndarray, h: float = 1e-8) -> np.ndarray:
+    fx = f(x)[0]
     grad = np.zeros_like(x)
-    fx = f(x)
-    for i in range(len(x)):
-        x_h = x.copy()
-        x_h[i] += h
-        grad[i] = (f(x_h) - fx) / h
+
+    # Perturbar una dimensión a la vez
+    perturb = np.eye(len(x)) * h  # matriz identidad escalada
+    xs_perturbed = x + perturb    # (n, n)
+    
+    fxs = np.array([float(f(xi)) for xi in xs_perturbed])  # aseguramos escalar por evaluación
+    grad = (fxs - fx) / h
     return grad
 
 def adam_optimize(
@@ -41,7 +45,8 @@ def adam_optimize(
             print(f"Converged at iteration {t}")
             break
 
-    fx = f(x)
-    if isinstance(fx, np.ndarray):
-        fx = float(fx)  # Convierte a escalar si es array
-    return x, fx
+        if np.linalg.norm(update) < tol:
+            print(f"[Adam] Update too small — stopping at iteration {t}")
+            break
+
+    return x, f(x)[0]

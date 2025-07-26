@@ -25,6 +25,7 @@ class Benchmark:
         for func in self.functions:
             name = func.__name__
             bounds, dim, stop_global_optimum = get_bounds_dimensions_and_stop_global_optimum(func, mode)
+            bounds = [bounds] * dim
 
             values: List[float] = []
             solutions: List[np.ndarray] = []
@@ -87,13 +88,13 @@ if __name__ == '__main__':
 
     benchmark = Benchmark(funcs)
     summary = benchmark.run_benchmark(
-        runs=5,
+        runs=1,
         mode="hard",
-        num_swarms=5,
-        swarm_size=15,
+        num_swarms=10,
+        swarm_size=2_000,
         max_generations=35000,
         migration_rate=0.2,
-        num_generations_no_improve_stop=200
+        num_generations_no_improve_stop=500
     )
 
     # Print summary
