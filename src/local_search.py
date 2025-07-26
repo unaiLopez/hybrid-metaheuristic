@@ -1,23 +1,47 @@
-import random
+import numpy as np
+from typing import Callable, Tuple
 
-from typing import Tuple
-from custom_typings import ObjectiveFunction, Vector, Bounds, Fitness
+def numerical_gradient(f: Callable[[np.ndarray], float], x: np.ndarray, h: float = 1e-8) -> np.ndarray:
+    grad = np.zeros_like(x)
+    fx = f(x)
+    for i in range(len(x)):
+        x_h = x.copy()
+        x_h[i] += h
+        grad[i] = (f(x_h) - fx) / h
+    return grad
 
-def ballistic_local_search(center: Vector, objective: ObjectiveFunction, bounds: Bounds, depth: int = 10, spread: float = 1.0) -> Tuple[Vector, Fitness]:
-    best = center[:]
-    best_score = objective(best)
+def adam_optimize(
+    f: Callable[[np.ndarray], float],
+    x_init: np.ndarray,
+    learning_rate: float = 0.01,
+    beta1: float = 0.9,
+    beta2: float = 0.999,
+    epsilon: float = 1e-8,
+    max_iters: int = 1000,
+    tol: float = 1e-6,
+) -> Tuple[np.ndarray, float]:
     
-    for _ in range(depth):
-        candidate = []
-        for x in center:
-            # Genera un valor candidato y lo limita dentro de bounds
-            val = x + random.uniform(-spread, spread)
-            val = max(bounds[0], min(bounds[1], val))
-            candidate.append(val)
-        
-        score = objective(candidate)
-        if score < best_score:
-            best = candidate
-            best_score = score
+    x = x_init.copy()
+    m = np.zeros_like(x)  # 1st moment vector
+    v = np.zeros_like(x)  # 2nd moment vector
 
-    return best, best_score
+    for t in range(1, max_iters + 1):
+        grad = numerical_gradient(f, x)
+
+        m = beta1 * m + (1 - beta1) * grad
+        v = beta2 * v + (1 - beta2) * (grad ** 2)
+
+        m_hat = m / (1 - beta1 ** t)
+        v_hat = v / (1 - beta2 ** t)
+
+        update = learning_rate * m_hat / (np.sqrt(v_hat) + epsilon)
+        x -= update
+
+        if np.linalg.norm(grad) < tol:
+            print(f"Converged at iteration {t}")
+            break
+
+    fx = f(x)
+    if isinstance(fx, np.ndarray):
+        fx = float(fx)  # Convierte a escalar si es array
+    return x, fx

@@ -2,19 +2,20 @@ from equations import *
 from multi_swarm_optimizer import MultiSwarmOptimizer
 
 # Parámetros del problema
-bounds, dimension = get_bounds_and_dimensions(schwefel_2_22)
-print(f"DIMENSION {dimension}")
-print(f"BOUNDS {bounds}")
+bounds, dimension, stop_optimum_value = get_bounds_dimensions_and_stop_global_optimum(schwefel_2_22, "hard")
+bounds = [bounds] * dimension
 
 # Instanciar el optimizador multi-enjambre
 optimizer = MultiSwarmOptimizer(
     objective=schwefel_2_22,
-    dim=400,
+    dim=dimension,
     bounds=bounds,
     num_swarms=5,
     swarm_size=2000,
+    num_generations_no_improve_stop=1000,
     max_generations=10000,
     migration_rate=0.2,
+    stop_score=stop_optimum_value
 )
 
 # Ejecutar optimización

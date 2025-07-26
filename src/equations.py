@@ -1,6 +1,9 @@
 import numpy as np
 from typing import Tuple, Callable
 
+# Benchmark is based on the benchmark for metaheuristics proposed in this paper
+# https://joiv.org/index.php/joiv/article/download/65/66?__cf_chl_tk=DyQSbMtVJAe8EIj0QOMqO69ERZ_Ix2yflVFE5nApvvk-1753531352-1.0.1.1-F8vIOG593HhB3rxEJvJHktpM2WYw5d2beBPerMP2nV8
+
 def sphere(x: np.ndarray) -> np.ndarray:
     """
     Minimum is 0 at f(x*)=[0,0,…,0].
@@ -186,25 +189,65 @@ def himmelblau(x: np.ndarray) -> np.ndarray:
     
     return (x1**2 + x2 - 11)**2 + (x1 + x2**2 - 7)**2
 
-def get_bounds_and_dimensions(func: Callable) -> Tuple[Tuple[float, float], int]:
+def get_bounds_dimensions_and_stop_global_optimum(func: Callable, mode: str) -> Tuple[Tuple[float, float], int]:
     name = func.__name__
-    lookup = {
-        "sphere":                 ((-100, 100), 30),
-        "rosenbrock":             ((-30,   30), 30),
-        "quartic":                ((-1.28, 1.28),30),
-        "step":                   ((-100, 100), 30),
-        "schwefel_2_22":          ((-10,   10), 30),
-        "sum_square":             ((-10,   10), 30),
-        "elliptic":               ((-100, 100), 30),
-        "ackley":                 ((-32, 32), 30),
-        "griewank":               ((-600, 600), 30),
-        "weierstrass":            ((-0.5,  0.5), 30),
-        "rastrigin":              ((-5.12, 5.-12), 30),
-        "non_continuous_rastrigin": ((-5.12, 5.12), 30),
-        "penalized2":             ((-50,   50), 30),
-        "schaffer":               ((-100, 100),  2),
-        "alpine":                 ((-10,   10), 30),
-        "himmelblau":             ((-6,    6),   2),
-    }
 
-    return lookup.get(name, ((-100, 100), 30))
+    if mode == "easy":
+        lookup = {
+            "sphere":                 ((-5.12, 5.12), 3, 1e-6),
+            "rosenbrock":             ((-5, 10), 5, 1e-6),
+            "quartic":                ((-1.28, 1.28), 10, 1e-6),
+            "step":                   ((-100, 100), 5, 1e-6),
+            "schwefel_2_22":          ((-10, 10), 10, 1e-6),
+            "sum_square":            ((-10, 10), 10, 1e-6),
+            "elliptic":               ((-100, 100), 10, 1e-6),
+            "ackley":                 ((-32, 32), 5, 1e-6),
+            "griewank":               ((-600, 600), 2, 1e-6),
+            "weierstrass":            ((-0.5, 0.5), 10, 1e-6),
+            "rastrigin":              ((-5.12, 5.12), 10, 1e-6),
+            "non_continuous_rastrigin": ((-5.12, 5.12), 10, 1e-6),
+            "penalized2":             ((-5.12, 5.12), 10, 1e-6),
+            "schaffer":               ((-100, 100), 2, 1e-6),
+            "alpine":                 ((-10, 10), 10, 1e-6),
+            "himmelblau":             ((-6, 6), 30, 1e-6)
+        }
+    elif mode == "medium":
+        lookup = {
+            "sphere":                 ((-5.12, 5.12), 30, 1e-6),
+            "rosenbrock":             ((-5, 10), 30, 1e-6),
+            "quartic":                ((-1.28, 1.28), 30, 1e-6),
+            "step":                   ((-100, 100), 30, 1e-6),
+            "schwefel_2_22":          ((-10, 10), 30, 1e-6),
+            "sum_square":            ((-10, 10), 30, 1e-6),
+            "elliptic":               ((-100, 100), 30, 1e-6),
+            "ackley":                 ((-32, 32), 30, 1e-6),
+            "griewank":               ((-600, 600), 30, 1e-6),
+            "weierstrass":            ((-0.5, 0.5), 30, 1e-6),
+            "rastrigin":              ((-5.12, 5.12), 30, 1e-6),
+            "non_continuous_rastrigin": ((-5.12, 5.12), 30, 1e-6),
+            "penalized2":             ((-5.12, 5.12), 30, 1e-6),
+            "schaffer":               ((-100, 100), 2, 1e-6),
+            "alpine":                 ((-10, 10), 30, 1e-6),
+            "himmelblau":             ((-6, 6), 50, 1e-6)
+        }
+    elif mode == "hard":
+        lookup = {
+            "sphere":                 ((-5.12, 5.12), 256, 1e-6),
+            "rosenbrock":             ((-5, 10), 100, 1e-6),
+            "quartic":                ((-1.28, 1.28), 100, 1e-6),
+            "step":                   ((-100, 100), 100, 1e-6),
+            "schwefel_2_22":          ((-10, 10), 100, 1e-6),
+            "sum_square":            ((-10, 10), 100, 1e-6),
+            "elliptic":               ((-100, 100), 100, 1e-6),
+            "ackley":                 ((-32, 32), 128, 1e-6),
+            "griewank":               ((-600, 600), 100, 1e-6),
+            "weierstrass":            ((-0.5, 0.5), 100, 1e-6),
+            "rastrigin":              ((-5.12, 5.12), 100, 1e-6),
+            "non_continuous_rastrigin": ((-5.12, 5.12), 100, 1e-6),
+            "penalized2":             ((-5.12, 5.12), 100, 1e-6),
+            "schaffer":               ((-100, 100), 50, 1e-6),
+            "alpine":                 ((-10, 10), 100, 1e-6),
+            "himmelblau":             ((-6, 6), 200, 1e-6)
+        }
+    
+    return lookup.get(name)

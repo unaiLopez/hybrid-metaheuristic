@@ -4,22 +4,23 @@ import local_search as local_search
 
 from typing import Tuple
 from memory_bank import MemoryBank
-from custom_typings import ObjectiveFunction
+from typing import Callable, List
 
 class Swarm:
     def __init__(
         self,
-        objective: ObjectiveFunction,
+        objective: Callable[[np.ndarray], np.ndarray],
         dim: int,
-        bounds: Tuple[float, float],
+        bounds: List[Tuple[float, float]],
         swarm_size: int
-    ) -> None:
+    ):
         self.objective = objective
         self.dim = dim
         self.bounds = bounds
+        self.lower_bounds = np.array([b[0] for b in self.bounds])
+        self.upper_bounds = np.array([b[1] for b in self.bounds])
         self.memory = MemoryBank()
-
-        self.positions = np.random.uniform(bounds[0], bounds[1], size=(swarm_size, dim))
+        self.positions = np.array([np.random.uniform(low, high, size=swarm_size) for (low, high) in bounds]).T
         self.velocities = np.random.uniform(-1.0, 1.0, size=(swarm_size, dim))
 
         self.values = self.objective(self.positions)  # Evaluar todas las partículas
@@ -39,10 +40,10 @@ class Swarm:
         self.memory.update(self.best_global, self.best_score)
 
         # Obtener una solución social de la memoria (exploración cooperativa)
-        social_best = (
+        social_best = np.array((
             random.choice(self.memory.get_top_k(10))
             if self.memory.solutions else self.best_global
-        )
+        ))
 
         # Hiperparámetros PSO
         c1 = np.random.uniform(1.0, 2.5)
@@ -53,11 +54,11 @@ class Swarm:
 
         # Actualización vectorizada
         cognitive = c1 * r1 * (self.pbest_pos - self.positions)
-        social = c2 * r2 * (np.array(social_best) - self.positions)
+        social = c2 * r2 * (social_best - self.positions)
         self.velocities = inertia * self.velocities + cognitive + social
 
         # Movimiento y restricción al dominio
-        self.positions = np.clip(self.positions + self.velocities, self.bounds[0], self.bounds[1])
+        self.positions = np.clip(self.positions + self.velocities, self.lower_bounds, self.upper_bounds)
 
         # Reevaluar las posiciones
         self.values = self.objective(self.positions)
