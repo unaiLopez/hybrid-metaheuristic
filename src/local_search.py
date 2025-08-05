@@ -1,6 +1,5 @@
 import numpy as np
 from typing import Callable, Tuple
-import time
 
 def numerical_gradient(f: Callable[[np.ndarray], float], x: np.ndarray, h: float = 1e-8) -> np.ndarray:
     fx = f(x)[0]

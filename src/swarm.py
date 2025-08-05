@@ -21,6 +21,9 @@ class Swarm:
         self.upper_bounds = np.array([b[1] for b in self.bounds])
         self.memory = MemoryBank()
         self.positions = np.array([np.random.uniform(low, high, size=swarm_size) for (low, high) in bounds]).T
+        self.c1s = np.random.uniform(1.5, 2.0, size=(swarm_size, 1))
+        self.c2s = np.random.uniform(1.5, 2.0, size=(swarm_size, 1))
+        self.inertias = np.random.uniform(0.5, 0.9, size=(swarm_size, 1))
         self.velocities = np.random.uniform(-1.0, 1.0, size=(swarm_size, dim))
 
         self.values = self.objective(self.positions)  # Evaluar todas las partículas
@@ -31,6 +34,24 @@ class Swarm:
         self.best_global = self.positions[self.best_index].copy()
         self.best_score = self.values[self.best_index]
         self.memory.update(self.best_global, self.best_score)
+
+    
+    def calculate_gradients_using_central_difference(self, h: float = 1e-5) -> np.ndarray:
+        dims = self.positions.shape[1]
+        I = np.eye(dims)  # shape (dims,dims)
+
+        # Expandimos X para broadcasting:
+        # Queremos shape (d, n, d)
+        X_expanded = self.positions[:, np.newaxis, :]  # (1,4,3)
+
+        # Expandimos I para broadcasting sumando h en cada dimensión:
+        I_expanded = I[np.newaxis, :, :]  # (3,1,3)
+
+        # Suma vectorizada:
+        X_plus = X_expanded + h * I_expanded  # shape (3,4,3)
+        X_minus = X_expanded - h * I_expanded
+
+        return (self.objective(X_plus) - self.objective(X_minus)) / (2 * h)
     
     def update_best(self, new_best_global: np.ndarray, new_best_value: float) -> None:
         self.values[self.best_index] = new_best_value
@@ -53,16 +74,14 @@ class Swarm:
         ))
 
         # Hiperparámetros PSO
-        c1 = np.random.uniform(1.0, 2.5)
-        c2 = np.random.uniform(1.0, 2.5)
-        inertia = np.random.uniform(0.3, 0.9)
         r1 = np.random.rand(*self.positions.shape)
         r2 = np.random.rand(*self.positions.shape)
 
         # Actualización vectorizada
-        cognitive = c1 * r1 * (self.pbest_pos - self.positions)
-        social = c2 * r2 * (social_best - self.positions)
-        self.velocities = inertia * self.velocities + cognitive + social
+        cognitives = self.c1s * r1 * (self.pbest_pos - self.positions)
+        socials = self.c2s * r2 * (social_best - self.positions)
+
+        self.velocities = self.inertias * self.velocities + cognitives + socials
 
         # Movimiento y restricción al dominio
         self.positions = np.clip(self.positions + self.velocities, self.lower_bounds, self.upper_bounds)
