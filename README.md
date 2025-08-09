@@ -1,4 +1,4 @@
-# HMS-POAAB
+# Hybrid Multi-Swarm Particle Optimization with Adam and Adaptive Bounds (HMS-POAAB)
 
 **Hybrid Multi-Swarm Particle Optimization with Adam and Adaptive Bounds**
 
