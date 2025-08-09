@@ -1,3 +1,5 @@
+import os
+import csv
 import time
 import numpy as np
 
@@ -15,9 +17,18 @@ class Benchmark:
         runs: int,
         num_swarms: int,
         swarm_size: int,
+        top_social_bests_to_choose_per_swarm: int,
+        c1_range_per_swarm: Tuple[float, float],
+        c2_range_per_swarm: Tuple[float, float],
+        inertia_range_per_swarm: Tuple[float, float],
         max_generations: int,
         migration_rate: float,
-        num_generations_no_improve_stop: int
+        no_improve_stop: int,
+        migration_interval: int,
+        adam_interval: int,
+        shrink_rounds: int,
+        top_k_for_next_round_bounds: int,
+        min_relative_variance_before_reseeding: float
     ) -> Dict[str, Dict[str, Any]]:
         
         results: Dict[str, Dict[str, Any]] = {}
@@ -38,10 +49,19 @@ class Benchmark:
                     bounds=bounds,
                     num_swarms=num_swarms,
                     swarm_size=swarm_size,
+                    top_social_bests_to_choose_per_swarm=top_social_bests_to_choose_per_swarm,
+                    c1_range_per_swarm=c1_range_per_swarm,
+                    c2_range_per_swarm=c2_range_per_swarm,
+                    inertia_range_per_swarm=inertia_range_per_swarm,
                     max_generations=max_generations,
                     migration_rate=migration_rate,
                     stop_score=stop_global_optimum,
-                    num_generations_no_improve_stop=num_generations_no_improve_stop
+                    no_improve_stop=no_improve_stop,
+                    migration_interval=migration_interval,
+                    adam_interval=adam_interval,
+                    shrink_rounds=shrink_rounds,
+                    top_k_for_next_round_bounds=top_k_for_next_round_bounds,
+                    min_relative_variance_before_reseeding=min_relative_variance_before_reseeding
                 )
                 best_sol, best_val = optimizer.optimize()
                 values.append(best_val)
@@ -56,6 +76,8 @@ class Benchmark:
 
             results[name] = {
                 'runs': [float(value) for value in values],
+                'bounds': bounds[0],
+                'dimensions': dim,
                 'execution_times': times,
                 'best_solutions': solutions,
                 'mean_execution_times': np.mean(times),
@@ -69,6 +91,7 @@ class Benchmark:
 
 if __name__ == '__main__':
     funcs = [
+        weierstrass,
         sphere,
         rosenbrock,
         quartic,
@@ -78,33 +101,55 @@ if __name__ == '__main__':
         elliptic,
         griewank,
         ackley,
-        weierstrass,
         non_continuous_rastrigin,
         penalized2,
         schaffer,
         alpine,
         himmelblau
     ]
-
+    mode = "hard"
     benchmark = Benchmark(funcs)
     summary = benchmark.run_benchmark(
-        runs=1,
-        mode="hard",
-        num_swarms=10,
+        runs=5,
+        mode=mode,
+        num_swarms=5,
         swarm_size=2_000,
-        max_generations=35000,
-        migration_rate=0.2,
-        num_generations_no_improve_stop=500
+        top_social_bests_to_choose_per_swarm=10,
+        c1_range_per_swarm=(1.0, 1.5),
+        c2_range_per_swarm=(1.0, 1.5),
+        inertia_range_per_swarm=(0.4, 0.8),
+        max_generations=2000,
+        migration_rate=0.01,
+        no_improve_stop=None,
+        migration_interval=100,
+        adam_interval=200,
+        shrink_rounds=3,
+        top_k_for_next_round_bounds=50,
+        min_relative_variance_before_reseeding=0.001
     )
 
-    # Print summary
+    rows = []
     for fname, stats in summary.items():
-        print(f"Function: {fname}")
-        print(f"  All Runs:   {stats['runs']}")
-        print(f"  All Execution Times:   {stats['execution_times']}")
-        print(f"  All Solutions:   {stats['best_solutions']}")
-        print(f"  Mean Execution Times:   {stats['mean_execution_times']:.4f}")
-        print(f"  Mean Values:   {stats['mean_val']:.4f}")
-        print(f"  Median Values: {stats['median_val']:.4f}")
-        print(f"  Min Values:    {stats['min_val']:.4f}")
-        print(f"  Max Values:    {stats['max_val']:.4f}\n")
+        for run, execution_time in zip(stats['runs'], stats['execution_times']):
+            rows.append({
+                "Function": fname,
+                "Bounds": stats['bounds'],
+                "Dimensions": stats['dimensions'],
+                "Mode": mode,
+                "All Runs": run,
+                "All Execution Times": execution_time,
+                "Mean Execution Times": stats['mean_execution_times'],
+                "Mean Values": stats['mean_val'],
+                "Median Values": stats['median_val'],
+                "Min Values": stats['min_val'],
+                "Max Values": stats['max_val']
+            })
+
+    # Guardar en CSV
+    os.makedirs("../output", exist_ok=True)
+    with open(f"../output/benchmark_result_mode_{mode}.csv", mode="w", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=rows[0].keys())
+        writer.writeheader()
+        writer.writerows(rows)
+
+    print(f"Archivo 'benchmark_result_mode_{mode}.csv' guardado con éxito.")

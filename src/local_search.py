@@ -1,20 +1,18 @@
 import numpy as np
 from typing import Callable, Tuple
 
-def numerical_gradient(f: Callable[[np.ndarray], float], x: np.ndarray, h: float = 1e-8) -> np.ndarray:
-    fx = f(x)[0]
-    grad = np.zeros_like(x)
+def numerical_gradient_central_differentiation(objective: Callable[[np.ndarray], float], x: np.ndarray, h: float = 1e-8) -> np.ndarray:
+    dims = x.shape[0]
 
-    # Perturbar una dimensión a la vez
-    perturb = np.eye(len(x)) * h  # matriz identidad escalada
-    xs_perturbed = x + perturb    # (n, n)
-    
-    fxs = np.array([float(f(xi)) for xi in xs_perturbed])  # aseguramos escalar por evaluación
-    grad = (fxs - fx) / h
-    return grad
+    I = np.eye(dims)
+    X_expanded = x[np.newaxis, :]
+    X_plus = X_expanded + h * I
+    X_minus = X_expanded - h * I
+
+    return (objective(X_plus) - objective(X_minus)) / (2 * h)
 
 def adam_optimize(
-    f: Callable[[np.ndarray], float],
+    objective: Callable[[np.ndarray], float],
     x_init: np.ndarray,
     learning_rate: float = 0.01,
     beta1: float = 0.9,
@@ -25,11 +23,11 @@ def adam_optimize(
 ) -> Tuple[np.ndarray, float]:
     
     x = x_init.copy()
-    m = np.zeros_like(x)  # 1st moment vector
-    v = np.zeros_like(x)  # 2nd moment vector
+    m = np.zeros_like(x)
+    v = np.zeros_like(x)
 
     for t in range(1, max_iters + 1):
-        grad = numerical_gradient(f, x)
+        grad = numerical_gradient_central_differentiation(objective, x)
 
         m = beta1 * m + (1 - beta1) * grad
         v = beta2 * v + (1 - beta2) * (grad ** 2)
@@ -48,4 +46,4 @@ def adam_optimize(
             print(f"[Adam] Update too small — stopping at iteration {t}")
             break
 
-    return x, f(x)[0]
+    return x, objective(x)[0]

@@ -194,6 +194,7 @@ def get_bounds_dimensions_and_stop_global_optimum(func: Callable, mode: str) -> 
 
     if mode == "easy":
         lookup = {
+            "weierstrass":            ((-0.5, 0.5), 10, -39.99),
             "sphere":                 ((-5.12, 5.12), 3, 1e-6),
             "rosenbrock":             ((-5, 10), 5, 1e-6),
             "quartic":                ((-1.28, 1.28), 10, 1e-6),
@@ -203,7 +204,6 @@ def get_bounds_dimensions_and_stop_global_optimum(func: Callable, mode: str) -> 
             "elliptic":               ((-100, 100), 10, 1e-6),
             "ackley":                 ((-32, 32), 5, 1e-6),
             "griewank":               ((-600, 600), 2, 1e-6),
-            "weierstrass":            ((-0.5, 0.5), 10, 1e-6),
             "rastrigin":              ((-5.12, 5.12), 10, 1e-6),
             "non_continuous_rastrigin": ((-5.12, 5.12), 10, 1e-6),
             "penalized2":             ((-5.12, 5.12), 10, 1e-6),
@@ -213,6 +213,7 @@ def get_bounds_dimensions_and_stop_global_optimum(func: Callable, mode: str) -> 
         }
     elif mode == "medium":
         lookup = {
+            "weierstrass":            ((-0.5, 0.5), 30, -119.99),
             "sphere":                 ((-5.12, 5.12), 30, 1e-6),
             "rosenbrock":             ((-5, 10), 30, 1e-6),
             "quartic":                ((-1.28, 1.28), 30, 1e-6),
@@ -222,7 +223,6 @@ def get_bounds_dimensions_and_stop_global_optimum(func: Callable, mode: str) -> 
             "elliptic":               ((-100, 100), 30, 1e-6),
             "ackley":                 ((-32, 32), 30, 1e-6),
             "griewank":               ((-600, 600), 30, 1e-6),
-            "weierstrass":            ((-0.5, 0.5), 30, 1e-6),
             "rastrigin":              ((-5.12, 5.12), 30, 1e-6),
             "non_continuous_rastrigin": ((-5.12, 5.12), 30, 1e-6),
             "penalized2":             ((-5.12, 5.12), 30, 1e-6),
@@ -232,6 +232,7 @@ def get_bounds_dimensions_and_stop_global_optimum(func: Callable, mode: str) -> 
         }
     elif mode == "hard":
         lookup = {
+            "weierstrass":            ((-0.5, 0.5), 100, -399.99),
             "sphere":                 ((-5.12, 5.12), 256, 1e-6),
             "rosenbrock":             ((-5, 10), 100, 1e-6),
             "quartic":                ((-1.28, 1.28), 100, 1e-6),
@@ -241,7 +242,6 @@ def get_bounds_dimensions_and_stop_global_optimum(func: Callable, mode: str) -> 
             "elliptic":               ((-100, 100), 100, 1e-6),
             "ackley":                 ((-32, 32), 128, 1e-6),
             "griewank":               ((-600, 600), 100, 1e-6),
-            "weierstrass":            ((-0.5, 0.5), 100, 1e-6),
             "rastrigin":              ((-5.12, 5.12), 100, 1e-6),
             "non_continuous_rastrigin": ((-5.12, 5.12), 100, 1e-6),
             "penalized2":             ((-5.12, 5.12), 100, 1e-6),
