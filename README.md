@@ -1,7 +1,5 @@
 # Hybrid Multi-Swarm Particle Optimization with Adam and Adaptive Bounds (HMS-POAAB)
 
-**Hybrid Multi-Swarm Particle Optimization with Adam and Adaptive Bounds**
-
 HMS-POAAB is a hybrid metaheuristic optimization algorithm that I built from scratch through extensive experimentation — including trying out a bunch of ideas that didn’t work nearly as well. It’s designed to solve difficult continuous-variable minimization problems, especially in **high-dimensional, rugged search spaces** filled with local minima.
 
 The algorithm combines:
