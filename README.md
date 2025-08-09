@@ -61,8 +61,11 @@ optimizer = MultiSwarmOptimizer(
     objective=objective,
     dim=dim,
     bounds=bounds,
-    swarm_size=50,
-    num_swarms=5
+    swarm_size=200,
+    num_swarms=5,
+    max_generations=1000,
+    stop_score=1e-6,
+    shrink_rounds=3
 )
 
 # Run optimization
